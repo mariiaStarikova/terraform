@@ -16,10 +16,3 @@ provider "aws" {
    default = "auto-test-multi-stack-template-aws"
    description = "Name for VM to be created"
 }
-
-
-
-
-{
-  "vm_name" : "auto-user-from-multi-stack-2"
-}
