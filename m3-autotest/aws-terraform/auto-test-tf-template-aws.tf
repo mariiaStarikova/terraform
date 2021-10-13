@@ -12,6 +12,6 @@ provider "aws" {
  }
 
  variable "vm_name" {
-   default = "auto-test-multi-stack-template-aws-test"
+   default = "auto-test-multi-stack-template-aws-test2"
    description = "Name for VM to be created"
 }
