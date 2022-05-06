@@ -5,39 +5,39 @@ provider "azurerm"  {
 
 # Create a resource group if it doesn't exist
 resource "azurerm_resource_group" "myterraformgroup" {
-    name     = "${var.resourcename}${var.prefix}"
-    location = "East US"
+    name     = var.resourcename
+    location = "North Europe"
     tags = {
-        environment = "${var.default_environment_tag}"
+        environment = var.default_environment_tag
     }
 }
 # Create virtual network
 resource "azurerm_virtual_network" "myterraformnetwork" {
     name                = "myDemoVnet${var.prefix}"
     address_space       = ["10.0.0.0/16"]
-    location            = "East US"
-    resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
+    location            = "North Europe"
+    resource_group_name = azurerm_resource_group.myterraformgroup.name
     tags = {
-        environment = "${var.default_environment_tag}"
+        environment = var.default_environment_tag
     }
 }
 # Create subnet
 resource "azurerm_subnet" "myterraformsubnet" {
     name                 = "myDemoSubnet${var.prefix}"
-    resource_group_name  = "${azurerm_resource_group.myterraformgroup.name}"
-    virtual_network_name = "${azurerm_virtual_network.myterraformnetwork.name}"
+    resource_group_name  = azurerm_resource_group.myterraformgroup.name
+    virtual_network_name = azurerm_virtual_network.myterraformnetwork.name
     address_prefix       = "10.0.1.0/24"
 }
 # Create public IPs
-resource "azurerm_public_ip" "myterraformpublicip" {
-    name                         = "myDemoPublicIP${var.prefix}"
-    location                     = "East US"
-    resource_group_name          = "${azurerm_resource_group.myterraformgroup.name}"
-    public_ip_address_allocation = "dynamic"
-    tags = {
-        environment = "${var.default_environment_tag}"
-    }
-}
+#resource "azurerm_public_ip" "myterraformpublicip" {
+ #   name                         = "myDemoPublicIP${var.prefix}"
+ #   location                     = "North Europe"
+ #   resource_group_name          = azurerm_resource_group.myterraformgroup.name
+ #   public_ip_address_allocation = "dynamic"
+ #   tags = {
+ #       environment =var.default_environment_tag
+ #   }
+#}
 # Create Network Security Group and rule
 # resource "azurerm_network_secrity_group" "myterraformnsg" {
 #     name                = "myDemoNetworkSecurityGroup${var.prefix}"
@@ -76,37 +76,37 @@ resource "azurerm_public_ip" "myterraformpublicip" {
 # Create network interface
 resource "azurerm_network_interface" "myterraformnic" {
     name                      = "myDemoNIC${var.prefix}"
-    location                  = "East US"
-    resource_group_name       = "${azurerm_resource_group.myterraformgroup.name}"
+    location                  = "North Europe"
+    resource_group_name       = azurerm_resource_group.myterraformgroup.name
     #network_security_group_id = "${azurerm_network_security_group.myterraformnsg.id}"
     network_security_group_id = "/subscriptions/9d6cfeed-c793-4190-90cc-5ec066a3b4e6/resourceGroups/epm-cit2/providers/Microsoft.Network/networkSecurityGroups/epm-cit2-northeurope-sg"
     ip_configuration {
         name                          = "myNicConfiguration"
-        subnet_id                     = "${azurerm_subnet.myterraformsubnet.id}"
+        subnet_id                     = azurerm_subnet.myterraformsubnet.id
         private_ip_address_allocation = "dynamic"
-        public_ip_address_id          = "${azurerm_public_ip.myterraformpublicip.id}"
+      
     }
     tags = {
-        environment = "${var.default_environment_tag}"
+        environment = var.default_environment_tag
     }
 }
 # Generate random text for a unique storage account name
 resource "random_id" "randomId" {
     keepers = {
         # Generate a new ID only when a new resource group is defined
-        resource_group = "${azurerm_resource_group.myterraformgroup.name}"
+        resource_group = azurerm_resource_group.myterraformgroup.name
     }
     byte_length = 8
 }
 # Create storage account for boot diagnostics
 resource "azurerm_storage_account" "mystorageaccount" {
     name                        = "diag${random_id.randomId.hex}"
-    resource_group_name         = "${azurerm_resource_group.myterraformgroup.name}"
-    location                    = "East US"
+    resource_group_name         = azurerm_resource_group.myterraformgroup.name
+    location                    = "North Europe"
     account_tier                = "Standard"
     account_replication_type    = "LRS"
     tags = {
-        environment = "${var.default_environment_tag}"
+        environment = var.default_environment_tag
     }
 }
 # Create a random generator for VM names
@@ -121,13 +121,13 @@ resource "random_id" "osDiskname" {
 }
 # Create virtual machine
 resource "azurerm_virtual_machine" "myterraformvm" {
-    name                  = "${random_id.serverName.hex}"
-    location              = "East US"
-    resource_group_name   = "${azurerm_resource_group.myterraformgroup.name}"
-    network_interface_ids = ["${azurerm_network_interface.myterraformnic.id}"]
+    name                  =random_id.serverName.hex
+    location              = "North Europe"
+    resource_group_name   = azurerm_resource_group.myterraformgroup.name
+    network_interface_ids = [azurerm_network_interface.myterraformnic.id]
     vm_size               = "Standard_DS1_v2"
     storage_os_disk {
-        name              = "${random_id.osDiskname.hex}"
+        name              = random_id.osDiskname.hex
         caching           = "ReadWrite"
         create_option     = "FromImage"
         managed_disk_type = "Premium_LRS"
@@ -156,11 +156,11 @@ EOF
     }
     boot_diagnostics {
         enabled = "true"
-        storage_uri = "${azurerm_storage_account.mystorageaccount.primary_blob_endpoint}"
+        storage_uri = azurerm_storage_account.mystorageaccount.primary_blob_endpoint
     }
     tags = {
-	    Name        = "${var.vm_name}" 
-        environment = "${var.default_environment_tag}"
+	    Name        = var.vm_name
+        environment = var.default_environment_tag
     }
 }
 variable "resourcename" {
@@ -177,7 +177,4 @@ variable "vm_name" {
 variable "default_environment_tag" {
   default = "webb"
   description = "Default environment tag for the resources of stack"
-}
-output "vm_ip" {
-  value = "${azurerm_public_ip.myterraformpublicip.ip_address}"
 }
