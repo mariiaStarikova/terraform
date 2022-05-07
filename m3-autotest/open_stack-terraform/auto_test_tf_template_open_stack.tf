@@ -11,3 +11,12 @@ variable"vm_name"{
 default="auto-test-tf-template-openstack"
 description="NameforVMtobecreated"
 }
+variable"regionName"{
+description="regionName"
+}
+variable"tenantName"{
+default="EPM-CIT2"
+description="Namefor tenant"
+}
+
+
