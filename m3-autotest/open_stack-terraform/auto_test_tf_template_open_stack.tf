@@ -12,6 +12,7 @@ default="auto-test-tf-template-openstack"
 description="NameforVMtobecreated"
 }
 variable"regionName"{
+default="EPAM-BY2"
 description="regionName"
 }
 variable"tenantName"{
