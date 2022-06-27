@@ -28,6 +28,8 @@ resource "azurerm_subnet" "myterraformsubnet" {
     virtual_network_name = azurerm_virtual_network.myterraformnetwork.name
     address_prefix       = "10.0.1.0/24"
 }
+
+
 # Create public IPs
 #resource "azurerm_public_ip" "myterraformpublicip" {
  #   name                         = "myDemoPublicIP${var.prefix}"
