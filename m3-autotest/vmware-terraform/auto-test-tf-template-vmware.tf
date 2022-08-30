@@ -1,12 +1,12 @@
 provider"m3"{}
 resource"m3_instance""my-server"{
 image="Ubuntu18"
-instance_name=var.vm_name
-region_name=var.region
-tenant_name=var.tenantName
+name=var.vm_name
+region=var.region
+tenant=var.tenantName
 shape="MEDIUM"
 owner=var.owner
-key_name=var.keyName
+key=var.keyName
 }
 variable"vm_name"{
 default="auto-test-tf-template-vmware"
