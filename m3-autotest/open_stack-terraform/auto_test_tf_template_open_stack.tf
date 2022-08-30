@@ -1,9 +1,9 @@
 provider"m3"{}
 resource"m3_instance""my-server"{
 image="centos7_64-bit"
-instance_name=var.vm_name
-region_name=var.regionName
-tenant_name=var.tenantName
+name=var.vm_name
+region=var.regionName
+tenant=var.tenantName
 shape="SMALL"
 owner=var.owner
 }
