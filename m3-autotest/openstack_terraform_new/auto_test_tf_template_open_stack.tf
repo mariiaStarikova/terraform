@@ -8,6 +8,7 @@ terraform {
     }
 }
 
+
 # Configure the OpenStack Provider
 provider "openstack" {
     user_name  = var.user_name
