@@ -10,12 +10,12 @@ terraform {
 
 # Configure the OpenStack Provider
 provider "openstack" {
-    user_name  = "specialepm-csupl3@epam.com"
-    password = "${var.password}"
-    auth_url = "https://infra.mail.ru:35357/v3" 
-    region   = "RegionOne"
-    user_domain_id = "users"
-    tenant_id = "eb2abf2da25a41b8b81304ae5430748e"
+    user_name  = var.user_name
+    password = var.password
+    auth_url = var.auth_url
+    region   = var.region
+    user_domain_id = var.user_domain_id
+    tenant_id = var.tenant_id
 }
 
 data "openstack_compute_flavor_v2" "small_basic" {
@@ -26,6 +26,26 @@ output "basic_flavor_name" {
     value = data.openstack_compute_flavor_v2.small_basic.name
 }
 
+variable "user_name" {
+    default = "user_name"
+}
+
 variable "password" {
     default = "password"
+}
+
+variable "auth_url" {
+    default = "http://auth_url"
+}
+
+variable "region" {
+    default = "region"
+}
+
+variable "user_domain_id" {
+    default = "user_domain_id"
+}
+
+variable "tenant_id" {
+    default = "tenant_id"
 }
