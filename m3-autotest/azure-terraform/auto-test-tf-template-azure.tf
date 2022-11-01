@@ -2,7 +2,6 @@
 provider "azurerm"  {
   version = "=1.44.0"
 }
-
 # Create a resource group if it doesn't exist
 resource "azurerm_resource_group" "myterraformgroup" {
     name     = var.resourcename
