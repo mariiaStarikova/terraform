@@ -1,97 +1,46 @@
 # Configure the Microsoft Azure Provider
-provider "azurerm"  {
-  version = "=1.44.0"
-}
-# Create a resource group if it doesn't exist
+  provider "azurerm" {
+    features {
+     resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+    }
+  }
 resource "azurerm_resource_group" "myterraformgroup" {
-    name     = var.resourcename
+    name     = random_id.resourcename.dec
     location = "North Europe"
     tags = {
-        environment = var.default_environment_tag
+        environment = random_id.default_environment_tag.dec
     }
 }
-# Create virtual network
 resource "azurerm_virtual_network" "myterraformnetwork" {
-    name                = "myDemoVnet${var.prefix}"
+    name                = "myDemoVnet${random_id.prefix.dec}"
     address_space       = ["10.0.0.0/16"]
     location            = "North Europe"
     resource_group_name = azurerm_resource_group.myterraformgroup.name
     tags = {
-        environment = var.default_environment_tag
+        environment = random_id.default_environment_tag.dec
     }
 }
-# Create subnet
 resource "azurerm_subnet" "myterraformsubnet" {
-    name                 = "myDemoSubnet${var.prefix}"
+    name                 = "myDemoSubnet${random_id.prefix.dec}"
     resource_group_name  = azurerm_resource_group.myterraformgroup.name
     virtual_network_name = azurerm_virtual_network.myterraformnetwork.name
-    address_prefix       = "10.0.1.0/24"
+    address_prefixes       = ["10.0.1.0/24"]
 }
-
-
-# Create public IPs
-#resource "azurerm_public_ip" "myterraformpublicip" {
- #   name                         = "myDemoPublicIP${var.prefix}"
- #   location                     = "North Europe"
- #   resource_group_name          = azurerm_resource_group.myterraformgroup.name
- #   public_ip_address_allocation = "dynamic"
- #   tags = {
- #       environment =var.default_environment_tag
- #   }
-#}
-# Create Network Security Group and rule
-# resource "azurerm_network_secrity_group" "myterraformnsg" {
-#     name                = "myDemoNetworkSecurityGroup${var.prefix}"
-#     location            = "North Europe"
-#     resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
-#     tags = {
-#         environment = "${var.default_environment_tag}"
-#     }
-# }
-# resource "azurerm_network_security_rule" "SSH_rule" {
-#     name                       = "SSH"
-#     priority                   = 1001
-#     direction                  = "Inbound"
-#     access                     = "Allow"
-#     protocol                   = "Tcp"
-#     source_port_range          = "*"
-#     destination_port_range     = "22"
-#     source_address_prefix      = "*"
-#     destination_address_prefix = "*"
-#   resource_group_name         = "${azurerm_resource_group.myterraformgroup.name}"
-#   network_security_group_name = "${azurerm_network_security_group.myterraformnsg.name}"
-# }
-# resource "azurerm_network_security_rule" "WEB_rule" {
-#     name                       = "WEB_80"
-#     priority                   = 1002
-#     direction                  = "Inbound"
-#     access                     = "Allow"
-#     protocol                   = "Tcp"
-#     source_port_range          = "*"
-#     destination_port_range     = "80"
-#     source_address_prefix      = "*"
-#     destination_address_prefix = "*"
-#   resource_group_name         = "${azurerm_resource_group.myterraformgroup.name}"
-#   network_security_group_name = "${azurerm_network_security_group.myterraformnsg.name}"
-# }
-# Create network interface
 resource "azurerm_network_interface" "myterraformnic" {
-    name                      = "myDemoNIC${var.prefix}"
+    name                      = "myDemoNIC${random_id.prefix.dec}"
     location                  = "North Europe"
     resource_group_name       = azurerm_resource_group.myterraformgroup.name
-    #network_security_group_id = "${azurerm_network_security_group.myterraformnsg.id}"
-    network_security_group_id = "/subscriptions/9d6cfeed-c793-4190-90cc-5ec066a3b4e6/resourceGroups/epm-cit2/providers/Microsoft.Network/networkSecurityGroups/epm-cit2-northeurope-sg"
     ip_configuration {
         name                          = "myNicConfiguration"
         subnet_id                     = azurerm_subnet.myterraformsubnet.id
-        private_ip_address_allocation = "dynamic"
-      
+        private_ip_address_allocation = "Dynamic"
     }
     tags = {
-        environment = var.default_environment_tag
+        environment = random_id.default_environment_tag.dec
     }
 }
-# Generate random text for a unique storage account name
 resource "random_id" "randomId" {
     keepers = {
         # Generate a new ID only when a new resource group is defined
@@ -99,28 +48,14 @@ resource "random_id" "randomId" {
     }
     byte_length = 8
 }
-# Create storage account for boot diagnostics
-resource "azurerm_storage_account" "mystorageaccount" {
-    name                        = "diag${random_id.randomId.hex}"
-    resource_group_name         = azurerm_resource_group.myterraformgroup.name
-    location                    = "North Europe"
-    account_tier                = "Standard"
-    account_replication_type    = "LRS"
-    tags = {
-        environment = var.default_environment_tag
-    }
-}
-# Create a random generator for VM names
 resource "random_id" "serverName" {
   byte_length = 6
   prefix = "i-"
 }
-# Create a random generator for VM names
 resource "random_id" "osDiskname" {
   byte_length = 6
   prefix = "disk-"
 }
-# Create virtual machine
 resource "azurerm_virtual_machine" "myterraformvm" {
     name                  =random_id.serverName.hex
     location              = "North Europe"
@@ -142,7 +77,7 @@ resource "azurerm_virtual_machine" "myterraformvm" {
     os_profile {
         computer_name  = "myvm"
         admin_username = "azureuser"
-		admin_password = "SuperChocoPass&*SeaSaltJ123!"
+        admin_password = "SuperChocoPass&*SeaSaltJ123!"
         custom_data    = <<EOF
 #!/bin/bash
 sudo apt-get update
@@ -155,27 +90,24 @@ EOF
     os_profile_linux_config {
         disable_password_authentication = false
     }
-    boot_diagnostics {
-        enabled = "true"
-        storage_uri = azurerm_storage_account.mystorageaccount.primary_blob_endpoint
-    }
     tags = {
-	    Name        = var.vm_name
-        environment = var.default_environment_tag
+        Name        = var.vm_name
+        environment = random_id.default_environment_tag.dec
     }
-}
-variable "resourcename" {
-  default = "webRG"
-  description = "Name for resource group to create VM in"
-}
-variable "prefix" {
-    default = "webb"
 }
 variable "vm_name" {
   default = "webVmMm"
   description = "Name for VM to be created"
 }
-variable "default_environment_tag" {
-  default = "webb"
-  description = "Default environment tag for the resources of stack"
-}
+resource "random_id" "prefix" {
+    byte_length = 4
+    prefix = "webb-"
+  }
+resource "random_id" "resourcename" {
+    byte_length = 4
+    prefix = "webRG-"
+  }
+resource "random_id" "default_environment_tag" {
+    byte_length = 4
+    prefix = "webb-"
+  }
