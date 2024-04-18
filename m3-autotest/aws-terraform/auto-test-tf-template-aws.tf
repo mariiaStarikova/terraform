@@ -9,7 +9,6 @@ provider "aws" {
      Name = var.vm_name
    }
  }
-
  variable "vm_name" {
    default = "instancefromterraformgit"
    description = "Name for VM to be created"
