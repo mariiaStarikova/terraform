@@ -1,52 +1,39 @@
-# Define required providers
 terraform {
-    required_providers {
-        openstack = {
-            source  = "terraform-provider-openstack/openstack"
-            version = "~> 1.35.0"
-        }
+  required_providers {
+    m3 = {
+      source = "Maestro-Cloud-Control/m3"
+      version = "0.6.1"
     }
+  }
 }
-
-
-# Configure the OpenStack Provider
-provider "openstack" {
-    user_name  = var.user_name
-    password = var.password
-    auth_url = var.auth_url
-    region   = var.region
-    user_domain_id = var.user_domain_id
-    tenant_id = var.tenant_id
+provider "m3" {}
+resource "m3_instance" "my-server" {
+  image = "Ubuntu22.04_64-bit"
+  name = var.vm_name
+  region = var.m3_regionName
+  tenant = var.m3_tenantName
+  shape = "MINI"
+  enable_chef = false
+  key = var.key_name
+  owner = var.m3_owner
 }
-
-data "openstack_compute_flavor_v2" "small_basic" {
-    flavor_id = "25ae869c-be29-4840-8e12-99e046d2dbd4"
+variable "vm_name" {
+  description = "Name of the VM"
+  default = "mashatest"
 }
-
-output "basic_flavor_name" {
-    value = data.openstack_compute_flavor_v2.small_basic.name
+variable "m3_tenantName" {
+  description = "Tenant name"
+  default = "MAESTRO-OPENSOURCE-DEV"
 }
-
-variable "user_name" {
-    default = "user_name"
+variable "m3_regionName" {
+  description = "Region name"
+  default = "OPENSTACK-QA-4"
 }
-
-variable "password" {
-    default = "password"
+variable "key_name" {
+  description = "key_name"
+  default = "maksym_splitfire_test_key2"
 }
-
-variable "auth_url" {
-    default = "http://auth_url"
-}
-
-variable "region" {
-    default = "region"
-}
-
-variable "user_domain_id" {
-    default = "user_domain_id"
-}
-
-variable "tenant_id" {
-    default = "tenant_id"
+variable "m3_owner" {
+  description = "owner"
+  default = "mariia_starikova@epam.com"
 }
