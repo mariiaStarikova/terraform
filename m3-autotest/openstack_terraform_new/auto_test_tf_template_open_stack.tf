@@ -32,7 +32,7 @@ variable "m3_regionName" {
 }
 variable "key_name" {
   description = "key_name"
-  default = "maksym_splitfire_test_key2"
+  default = "masha_syndicate_server"
 }
 variable "m3_owner" {
   description = "owner"
