@@ -17,6 +17,7 @@ resource "m3_instance" "my-server" {
   key = var.key_name
   owner = var.m3_owner
 }
+
 variable "vm_name" {
   description = "Name of the VM"
   default = "mashatest"
