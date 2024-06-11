@@ -30,6 +30,7 @@ variable "m3_regionName" {
   description = "Region name"
   default = "OPENSTACK-QA-4"
 }
+
 variable "key_name" {
   description = "key_name"
   default = "masha_syndicate_server"
